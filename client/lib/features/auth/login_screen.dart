@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/services/api_service.dart';
+import '../admin/admin_dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,11 +27,22 @@ class _LoginScreenState extends State<LoginScreen> {
         'password': _passwordController.text,
       });
 
-      // If success, show message
+      // If success
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login Success! Role: ${result['role']}')),
-        );
+        // 1. SAVE THE KEY (Token) 🔑
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', result['token']);
+
+        if (result['role'] == 'ADMIN') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminDashboard()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login Success! Role: ${result['role']}')),
+          );
+        }
       }
     } catch (e) {
       // If error, show red alert
