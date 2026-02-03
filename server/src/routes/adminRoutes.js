@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const verifyToken = require('../middlewares/authMiddleware');
+const adminController = require('../controllers/adminController');
+
+
+router.get('/stats', verifyToken, adminController.getDashboardStats);
+
 
 router.get('/dashboard', verifyToken, (req, res) => {
     res.status(200).json({

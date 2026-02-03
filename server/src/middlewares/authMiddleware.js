@@ -1,6 +1,6 @@
-const { admin } = require('../config/firebase');
+const jwt = require('jsonwebtoken');
 
-const verifyToken = async (req, res, next) => {
+const verifyToken = (req, res, next) => {
     const tokenHeader = req.headers.authorization;
 
     // 1. Check if token exists
@@ -14,13 +14,13 @@ const verifyToken = async (req, res, next) => {
     const token = tokenHeader.split(' ')[1];
 
     try {
-        // 2. Verify token with Firebase
-        const decodedToken = await admin.auth().verifyIdToken(token);
+        // 2. Verify Custom JWT (The Key we made in authController)
+        const JWT_SECRET = process.env.JWT_SECRET || 'asha_ai_dev_secret_key_123';
+        const decoded = jwt.verify(token, JWT_SECRET);
 
-        // 3. Attach user info to request (so Controllers can use it)
-        req.user = decodedToken;
+        // 3. Attach user info
+        req.user = decoded;
 
-        // 4. Allow them to pass
         next();
     } catch (error) {
         console.error('Auth Error:', error.message);
