@@ -17,6 +17,7 @@ app.use(cors());
 
 app.use('/api/health', require('./routes/healthRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
 
 // 5. START SERVER
 const PORT = process.env.PORT || 3000;
