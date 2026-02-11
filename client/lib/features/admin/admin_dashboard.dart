@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/services/api_service.dart';
+import '../patient/patient_list_screen.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -62,21 +63,31 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   // Helper Widget
-  Widget _buildCard(String title, dynamic count, IconData icon, Color color) {
+   Widget _buildCard(String title, dynamic count, IconData icon, Color color) {
     return Card(
       elevation: 4,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 40, color: color),
-          const SizedBox(height: 10),
-          Text(
-            count?.toString() ?? '0',
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 5),
-          Text(title, style: const TextStyle(color: Colors.grey)),
-        ],
+      child: InkWell(
+        onTap: () {
+          if (title == 'Total Patients') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PatientListScreen()),
+            );
+          }
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 40, color: color),
+            const SizedBox(height: 10),
+            Text(
+              count?.toString() ?? '0',
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 5),
+            Text(title, style: const TextStyle(color: Colors.grey)),
+          ],
+        ),
       ),
     );
   }
