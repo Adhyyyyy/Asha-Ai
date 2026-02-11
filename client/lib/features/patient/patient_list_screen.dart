@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/services/api_service.dart';
 import 'add_patient_screen.dart';
+import '../screening/ai_screening_screen.dart';
 
 class PatientListScreen extends StatefulWidget {
   const PatientListScreen({super.key});
@@ -68,8 +69,17 @@ class _PatientListScreenState extends State<PatientListScreen> {
                     title: Text(patient['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text('Age: ${patient['age']} • Trimester: ${patient['trimester']}'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                       // TODO: View Patient Details
+                                        onTap: () {
+                       // Navigate to AI Screening
+                       Navigator.push(
+                         context,
+                         MaterialPageRoute(
+                           builder: (context) => AiScreeningScreen(
+                             patientId: patient['id'].toString(),
+                             patientName: patient['name'],
+                           ),
+                         ),
+                       );
                     },
                   ),
                 );
