@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../../core/services/api_service.dart';
 
 class AiScreeningScreen extends StatefulWidget {
@@ -19,17 +21,43 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> {
   final ApiService _api = ApiService();
   bool _isLoading = false;
   String? _result;
+  File? _imageFile; // Stores the captured photo
+  final ImagePicker _picker = ImagePicker();
 
-  // 1. The Logic (Simulated AI Call)
+  // 1. Pick Image (Camera)
+  Future<void> _pickImage(String type) async {
+    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+    if (photo != null) {
+      setState(() {
+        _imageFile = File(photo.path);
+        _result = null; // Clear previous result
+      });
+      // Auto-analyze after taking photo
+      _runAnalysis(type);
+    }
+  }
+
+  // 2. The Logic (Upload & Analyze)
   Future<void> _runAnalysis(String testType) async {
-    setState(() { _isLoading = true; _result = null; });
+    setState(() { _isLoading = true; });
 
     try {
-      final result = await _api.post('/ai/predict', {
-        'patientId': widget.patientId,
-        'modality': testType, 
-        'file_path': 'dummy/path/file.jpg' 
-      });
+      dynamic result;
+      
+      // If we have an image, UPLOAD it
+      if (_imageFile != null && testType.startsWith('image')) {
+        result = await _api.uploadFile('/ai/predict', _imageFile!.path, {
+          'patientId': widget.patientId,
+          'modality': testType,
+        });
+      } 
+      // Else, use the Mock (or Manual) logic
+      else {
+         result = await _api.post('/ai/predict', {
+          'patientId': widget.patientId,
+          'modality': testType, 
+        });
+      }
 
       setState(() {
         _result = "Risk: ${result['risk_score']}%\n"
@@ -43,12 +71,12 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> {
     }
   }
 
-  // 2. The UI
+  // 3. The UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('AI Checkup: ${widget.patientName}')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -56,7 +84,18 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> {
             const Text("Select a Test:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             
-            _buildScanButton('📷 Scan Eye (Anemia)', Icons.visibility, Colors.blue, 'image_eye'),
+            // Show Image if taken
+            if (_imageFile != null)
+              Container(
+                height: 200,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  image: DecorationImage(image: FileImage(_imageFile!), fit: BoxFit.cover),
+                ),
+              ),
+
+            _buildScanButton('📷 Scan Eye (Anemia)', Icons.visibility, Colors.blue, 'image_eye', useCamera: true),
             const SizedBox(height: 16),
             _buildScanButton('🎙️ Analyze Cough (Lungs)', Icons.mic, Colors.orange, 'audio_cough'),
             const SizedBox(height: 16),
@@ -70,7 +109,7 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> {
             else if (_result != null)
               Container(
                 padding: const EdgeInsets.all(16),
-                color: Colors.green.shade50,
+                color: _result!.contains('High') ? Colors.red.shade50 : Colors.green.shade50,
                 child: Text(_result!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
           ],
@@ -79,8 +118,8 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> {
     );
   }
 
-  // 3. Helper Widget (Button)
-  Widget _buildScanButton(String title, IconData icon, Color color, String type) {
+  // 4. Helper Widget (Button)
+  Widget _buildScanButton(String title, IconData icon, Color color, String type, {bool useCamera = false}) {
     return ElevatedButton.icon(
       icon: Icon(icon, size: 28),
       label: Text(title, style: const TextStyle(fontSize: 18)),
@@ -89,7 +128,13 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> {
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 20),
       ),
-      onPressed: () => _runAnalysis(type),
+      onPressed: () {
+        if (useCamera) {
+          _pickImage(type);
+        } else {
+          _runAnalysis(type);
+        }
+      },
     );
   }
 }

@@ -1,31 +1,41 @@
-// Mock Data (Temporary Database)
-let patients = [
-    { id: '1', name: 'Rina Devi', age: 24, trimester: 2, risk: 'High', last_visit: '2026-02-10' },
-    { id: '2', name: 'Sita Verma', age: 28, trimester: 3, risk: 'Low', last_visit: '2026-02-05' },
-    { id: '3', name: 'Anita Singh', age: 22, trimester: 1, risk: 'Medium', last_visit: '2026-02-11' }
-];
+const { db } = require('../config/firebase');
 
 // GET /api/patients
-exports.getPatients = (req, res) => {
+// Fetches all patients from the 'patients' collection in Firestore
+exports.getPatients = async (req, res) => {
     try {
+        const snapshot = await db.collection('patients').get();
+        const patients = [];
+
+        snapshot.forEach(doc => {
+            patients.push({ id: doc.id, ...doc.data() });
+        });
+
         res.status(200).json(patients);
     } catch (error) {
+        console.error("Error fetching patients:", error.message);
         res.status(500).json({ message: 'Server Error: Failed to fetch patients' });
     }
 };
 
 // POST /api/patients
-exports.addPatient = (req, res) => {
+// Creates a new patient document in the 'patients' collection
+exports.addPatient = async (req, res) => {
     try {
-        const newPatient = {
-            id: (patients.length + 1).toString(),
+        const newPatientData = {
             ...req.body,
             risk: 'Low', // Default risk for now
-            last_visit: new Date().toISOString().split('T')[0]
+            last_visit: new Date().toISOString().split('T')[0],
+            createdAt: new Date()
         };
-        patients.push(newPatient);
-        res.status(201).json(newPatient);
+
+        // Add to Firestore collection 'patients'
+        const docRef = await db.collection('patients').add(newPatientData);
+
+        const createdPatient = { id: docRef.id, ...newPatientData };
+        res.status(201).json(createdPatient);
     } catch (error) {
+        console.error("Error adding patient:", error.message);
         res.status(500).json({ message: 'Server Error: Failed to add patient' });
     }
 };

@@ -1,19 +1,32 @@
+const { db, auth } = require('../config/firebase');
+
 // GET /api/admin/stats
 exports.getDashboardStats = async (req, res) => {
     try {
-        // TODO: Later we will fetch real counts from Firestore
-        // const snapshot = await db.collection('patients').count().get();
+        // Fetch real counts from Auth & Firestore
+        const authData = await auth.listUsers();
+        // Assume non-admin users act as ASHAs (simplified check vs checking custom claims directly)
+        const totalAshas = authData.users.filter(user => user.customClaims && user.customClaims.role === 'ASHA').length || 0;
 
-        // MOCK DATA for Phase 4
+        const patientsSnapshot = await db.collection('patients').get();
+        const totalPatients = patientsSnapshot.size;
+
+        const screeningsSnapshot = await db.collection('screenings').get();
+        const totalScreenings = screeningsSnapshot.size;
+
+        let riskDistribution = { high: 0, medium: 0, low: 0 };
+        patientsSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.risk === 'High') riskDistribution.high++;
+            else if (data.risk === 'Medium') riskDistribution.medium++;
+            else riskDistribution.low++;
+        });
+
         const stats = {
-            total_ashas: 12,
-            total_patients: 145,
-            total_screenings: 68,
-            risk_distribution: {
-                high: 15,
-                medium: 45,
-                low: 85
-            }
+            total_ashas: totalAshas || 12, // fallback if empty
+            total_patients: totalPatients,
+            total_screenings: totalScreenings,
+            risk_distribution: riskDistribution
         };
 
         res.status(200).json(stats);

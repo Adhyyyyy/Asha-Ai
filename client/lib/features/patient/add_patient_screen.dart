@@ -81,6 +81,11 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                    return null;
                 },
               ),
+              const SizedBox(height: 12),
+              const Text(
+                'Note: Risk level will be established after initial AI screening.',
+                style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+              ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,

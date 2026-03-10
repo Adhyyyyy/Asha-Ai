@@ -54,4 +54,29 @@ class ApiService {
       throw Exception('API Error: ${response.statusCode} ${response.body}');
     }
   }
+  // 6. Upload File (Multipart Request)
+  Future<dynamic> uploadFile(String endpoint, String filePath, Map<String, String> fields) async {
+    final token = await _getToken();
+    var uri = Uri.parse('$baseUrl$endpoint');
+    var request = http.MultipartRequest('POST', uri);
+
+    // Add Headers
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    // Add Fields (e.g., patientId, modality)
+    request.fields.addAll(fields);
+
+    // Add File
+    // WE ASSUME THE FILE FIELD NAME IS 'file'
+    var pic = await http.MultipartFile.fromPath('file', filePath);
+    request.files.add(pic);
+
+    // Send
+    var streamResponse = await request.send();
+    var response = await http.Response.fromStream(streamResponse);
+
+    return _handleResponse(response);
+  }
 }

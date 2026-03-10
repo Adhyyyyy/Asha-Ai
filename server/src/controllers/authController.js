@@ -8,12 +8,28 @@ const MOCK_ADMIN = {
     uid: 'admin_001'
 };
 
+// HARDCODED ASHA (For testing only!)
+const MOCK_ASHA = {
+    username: 'sita.asha',
+    password: 'password123',
+    role: 'ASHA',
+    uid: 'asha_001'
+};
+
 exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
+        let userToLogin = null;
+
         // 1. Check Credentials
-        if (username !== MOCK_ADMIN.username || password !== MOCK_ADMIN.password) {
+        if (username === MOCK_ADMIN.username && password === MOCK_ADMIN.password) {
+            userToLogin = MOCK_ADMIN;
+        } else if (username === MOCK_ASHA.username && password === MOCK_ASHA.password) {
+            userToLogin = MOCK_ASHA;
+        }
+
+        if (!userToLogin) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
@@ -22,7 +38,7 @@ exports.login = async (req, res) => {
 
         // 3. Generate Token
         const token = jwt.sign(
-            { uid: MOCK_ADMIN.uid, role: MOCK_ADMIN.role },
+            { uid: userToLogin.uid, role: userToLogin.role },
             JWT_SECRET,
             { expiresIn: '1d' }
         );
@@ -31,7 +47,7 @@ exports.login = async (req, res) => {
         res.status(200).json({
             message: 'Login successful',
             token: token,
-            role: MOCK_ADMIN.role // Dart code looks for result['role']
+            role: userToLogin.role // Dart code looks for result['role']
         });
 
     } catch (error) {

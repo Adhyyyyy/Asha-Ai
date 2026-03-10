@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/services/api_service.dart';
 import '../admin/admin_dashboard.dart';
+import '../asha/asha_dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -39,8 +40,10 @@ class _LoginScreenState extends State<LoginScreen> {
             MaterialPageRoute(builder: (context) => const AdminDashboard()),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login Success! Role: ${result['role']}')),
+          // If ASha or other role, go to ASHA Dashboard
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AshaDashboard()),
           );
         }
       }

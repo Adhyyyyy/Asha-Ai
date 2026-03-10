@@ -1,9 +1,14 @@
 /* src/controllers/aiController.js */
+const { db } = require('../config/firebase');
 
 // POST /api/predict
 exports.analyzeHealth = async (req, res) => {
     try {
-        const { patientId, modality, file_path, manual_data } = req.body;
+        const { patientId, modality, manual_data } = req.body;
+        // Check if a file was uploaded 📸
+        if (req.file) {
+            console.log(`📸 RECEIVED FILE: ${req.file.path}`);
+        }
 
         // SIMULATED AI ENGINE 🧠
         // In reality, this would call a Python Model or TensorFlow Lite
@@ -68,11 +73,30 @@ exports.analyzeHealth = async (req, res) => {
             };
         }
 
+        // Save screening to Firestore
+        const screeningData = {
+            patientId,
+            modality,
+            file_path: req.file ? req.file.path : null, // Store path if any
+            timestamp: new Date(),
+            ...prediction
+        };
+
+        const docRef = await db.collection('screenings').add(screeningData);
+
+        // Optional: Update patient's overall risk if this screening detected a High risk
+        if (prediction.severity === 'High' || prediction.severity === 'Critical') {
+            await db.collection('patients').doc(patientId).update({
+                risk: 'High',
+                last_visit: new Date().toISOString().split('T')[0]
+            });
+        }
+
         // Return the "Crystal Ball" result
         res.status(200).json({
             success: true,
-            timestamp: new Date(),
-            ...prediction
+            screening_id: docRef.id,
+            ...screeningData
         });
 
     } catch (error) {
