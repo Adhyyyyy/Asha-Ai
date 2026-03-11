@@ -45,6 +45,33 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  // PUT Request
+  Future<dynamic> put(String endpoint, Map<String, dynamic> data) async {
+    final token = await _getToken();
+    final response = await http.put(
+      Uri.parse('$baseUrl$endpoint'),
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(data),
+    );
+    return _handleResponse(response);
+  }
+
+  // DELETE Request
+  Future<dynamic> delete(String endpoint) async {
+    final token = await _getToken();
+    final response = await http.delete(
+      Uri.parse('$baseUrl$endpoint'),
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
+    return _handleResponse(response);
+  }
+
   // 5. Helper: Handle Success vs Error
   // dynamic means "I don't know the type yet" (like 'any' in TS)
   dynamic _handleResponse(http.Response response) {

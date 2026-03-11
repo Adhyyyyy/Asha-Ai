@@ -19,6 +19,7 @@ app.use('/api/health', require('./routes/healthRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/patients', require('./routes/patientRoutes'));
+app.use('/api/asha', require('./routes/ashaRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 
 // 5. START SERVER

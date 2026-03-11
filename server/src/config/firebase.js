@@ -9,7 +9,8 @@ const serviceAccount = require('../../serviceAccountKey.json');
 
 try {
     admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
+        credential: admin.credential.cert(serviceAccount),
+        storageBucket: 'asha-ai-30512.appspot.com'
     });
     console.log('🔥 Firebase Admin connected to Real Database successfully!');
 } catch (error) {
@@ -19,5 +20,6 @@ try {
 
 const db = admin.firestore();
 const auth = admin.auth();
+const bucket = admin.storage().bucket();
 
-module.exports = { db, auth, admin };
+module.exports = { db, auth, admin, bucket };

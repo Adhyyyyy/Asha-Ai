@@ -1,9 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/services/api_service.dart';
 import '../patient/patient_list_screen.dart';
 import '../patient/add_patient_screen.dart';
+import '../auth/login_screen.dart';
 
-class AshaDashboard extends StatelessWidget {
+class AshaDashboard extends StatefulWidget {
   const AshaDashboard({super.key});
+
+  @override
+  State<AshaDashboard> createState() => _AshaDashboardState();
+}
+
+class _AshaDashboardState extends State<AshaDashboard> {
+  final ApiService _api = ApiService();
+  Map<String, dynamic>? _stats;
+  String _username = 'Worker';
+  String _area = 'Assigned Area';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    // We try to grab the username from prefs if saved by login, else default.
+    _username = prefs.getString('username') ?? 'Worker';
+    
+    try {
+      final data = await _api.get('/asha/stats');
+      if (mounted) {
+        setState(() {
+          _stats = data;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ STATS ERROR: $e');
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,20 +52,28 @@ class AshaDashboard extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              // TODO: Clear Token and go back to Login
-              Navigator.pushReplacementNamed(context, '/');
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('auth_token');
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false,
+                );
+              }
             },
           )
         ],
       ),
-      body: SingleChildScrollView(
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome Banner
+              // Welcome Banner & Gamification Banner
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -38,21 +85,44 @@ class AshaDashboard extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome back!',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                      'Welcome back, $_username!',
+                      style: const TextStyle(color: Colors.white70, fontSize: 16),
                     ),
-                    SizedBox(height: 5),
-                    Text(
-                      'Your Assigned Area: Village Alpha',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Leaderboard Rank', style: TextStyle(color: Colors.white, fontSize: 14)),
+                            Text(
+                              '#${_stats?['leaderboard_rank'] ?? '-'}',
+                              style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const Text('Total Points', style: TextStyle(color: Colors.white, fontSize: 14)),
+                            Row(
+                              children: [
+                                const Icon(Icons.stars, color: Colors.amber, size: 28),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${_stats?['points'] ?? 0}',
+                                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),

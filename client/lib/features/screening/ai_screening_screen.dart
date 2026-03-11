@@ -24,9 +24,11 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> {
   File? _imageFile; // Stores the captured photo
   final ImagePicker _picker = ImagePicker();
 
-  // 1. Pick Image (Camera)
-  Future<void> _pickImage(String type) async {
-    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+  // 1. Pick Image (Camera or Gallery)
+  Future<void> _pickImage(String type, {bool fromGallery = false}) async {
+    final XFile? photo = await _picker.pickImage(
+      source: fromGallery ? ImageSource.gallery : ImageSource.camera,
+    );
     if (photo != null) {
       setState(() {
         _imageFile = File(photo.path);
@@ -60,14 +62,18 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> {
       }
 
       setState(() {
-        _result = "Risk: ${result['risk_score']}%\n"
-                  "Condition: ${result['condition']}\n"
-                  "Advice: ${result['advice']}";
+        final riskScore = result['risk_score'] ?? 'N/A';
+        final condition = result['condition'] ?? 'Unknown';
+        final advice = result['advice'] ?? 'No advice provided.';
+        
+        _result = "Risk: $riskScore%\n"
+                  "Condition: $condition\n"
+                  "Advice: $advice";
       });
     } catch (e) {
-      setState(() => _result = 'Error: $e');
+      if (mounted) setState(() => _result = 'Error: $e');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -95,7 +101,9 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> {
                 ),
               ),
 
-            _buildScanButton('📷 Scan Eye (Anemia)', Icons.visibility, Colors.blue, 'image_eye', useCamera: true),
+            _buildScanButton('📷 Scan Eye (Camera)', Icons.visibility, Colors.blue, 'image_eye', useCamera: true),
+            const SizedBox(height: 16),
+            _buildScanButton('📁 Upload Screen (Gallery)', Icons.photo_library, Colors.blueGrey, 'image_eye', fromGallery: true),
             const SizedBox(height: 16),
             _buildScanButton('🎙️ Analyze Cough (Lungs)', Icons.mic, Colors.orange, 'audio_cough'),
             const SizedBox(height: 16),
@@ -119,7 +127,7 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> {
   }
 
   // 4. Helper Widget (Button)
-  Widget _buildScanButton(String title, IconData icon, Color color, String type, {bool useCamera = false}) {
+  Widget _buildScanButton(String title, IconData icon, Color color, String type, {bool useCamera = false, bool fromGallery = false}) {
     return ElevatedButton.icon(
       icon: Icon(icon, size: 28),
       label: Text(title, style: const TextStyle(fontSize: 18)),
@@ -129,8 +137,8 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> {
         padding: const EdgeInsets.symmetric(vertical: 20),
       ),
       onPressed: () {
-        if (useCamera) {
-          _pickImage(type);
+        if (useCamera || fromGallery) {
+          _pickImage(type, fromGallery: fromGallery);
         } else {
           _runAnalysis(type);
         }

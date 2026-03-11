@@ -33,6 +33,14 @@ class _LoginScreenState extends State<LoginScreen> {
         // 1. SAVE THE KEY (Token) 🔑
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', result['token']);
+        
+        // Save user info for Dashboard personalization
+        if (result['username'] != null) {
+          await prefs.setString('username', result['username']);
+        }
+        if (result['area'] != null) {
+          await prefs.setString('area', result['area']);
+        }
 
         if (result['role'] == 'ADMIN') {
           Navigator.pushReplacement(

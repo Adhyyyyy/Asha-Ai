@@ -15,4 +15,13 @@ router.get('/dashboard', verifyToken, (req, res) => {
     });
 });
 
+// ASHA Worker Management
+router.get('/ashas', verifyToken, adminController.getAshas);
+router.post('/ashas', verifyToken, adminController.createAsha);
+router.put('/ashas/:id', verifyToken, adminController.updateAsha);
+router.delete('/ashas/:id', verifyToken, adminController.deleteAsha);
+
+// Screening History
+router.get('/screenings', verifyToken, adminController.getScreenings);
+
 module.exports = router;

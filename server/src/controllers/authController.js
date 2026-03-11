@@ -16,17 +16,34 @@ const MOCK_ASHA = {
     uid: 'asha_001'
 };
 
+const { db } = require('../config/firebase'); // Need Firestore access
+
 exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
         let userToLogin = null;
 
-        // 1. Check Credentials
+        // 1. Check SuperAdmin (Hardcoded)
         if (username === MOCK_ADMIN.username && password === MOCK_ADMIN.password) {
             userToLogin = MOCK_ADMIN;
-        } else if (username === MOCK_ASHA.username && password === MOCK_ASHA.password) {
-            userToLogin = MOCK_ASHA;
+        } else {
+            // 2. Check Firestore for ASHA worker
+            const snapshot = await db.collection('users')
+                .where('username', '==', username)
+                .where('password', '==', password)
+                .get();
+
+            if (!snapshot.empty) {
+                const doc = snapshot.docs[0];
+                const data = doc.data();
+                userToLogin = {
+                    uid: doc.id,
+                    username: data.username,
+                    role: data.role,
+                    area: data.area
+                };
+            }
         }
 
         if (!userToLogin) {

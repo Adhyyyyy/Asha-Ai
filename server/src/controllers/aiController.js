@@ -1,13 +1,26 @@
 /* src/controllers/aiController.js */
-const { db } = require('../config/firebase');
+const { db, admin, bucket } = require('../config/firebase');
 
 // POST /api/predict
 exports.analyzeHealth = async (req, res) => {
     try {
         const { patientId, modality, manual_data } = req.body;
-        // Check if a file was uploaded 📸
+
+        let publicUrl = null;
+
+        // Check if a file was uploaded into memory 📸
         if (req.file) {
-            console.log(`📸 RECEIVED FILE: ${req.file.path}`);
+            console.log(`📸 RECEIVED FILE IN MEMORY, UPLOADING TO CLOUD STORAGE...`);
+            const extension = req.file.originalname.split('.').pop();
+            const filename = `screenings/${Date.now()}-${Math.round(Math.random() * 1E9)}.${extension}`;
+            const fileItem = bucket.file(filename);
+
+            await fileItem.save(req.file.buffer, {
+                metadata: { contentType: req.file.mimetype }
+            });
+
+            publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filename)}?alt=media`;
+            console.log(`✅ UPLOAD COMPLETE: ${publicUrl}`);
         }
 
         // SIMULATED AI ENGINE 🧠
@@ -76,13 +89,24 @@ exports.analyzeHealth = async (req, res) => {
         // Save screening to Firestore
         const screeningData = {
             patientId,
+            asha_id: req.user.uid, // Track WHICH ASHA did this!
             modality,
-            file_path: req.file ? req.file.path : null, // Store path if any
+            file_url: publicUrl, // Store Firebase Storage URL
             timestamp: new Date(),
             ...prediction
         };
 
         const docRef = await db.collection('screenings').add(screeningData);
+
+        // GAMIFICATION: Award 10 points to the ASHA worker for this screening (SRS REQ-5)
+        try {
+            await db.collection('users').doc(req.user.uid).update({
+                points: admin.firestore.FieldValue.increment(10)
+            });
+        } catch (e) {
+            // If points field doesn't exist yet, this might throw depending on rules, 
+            // but we use set with merge generally. Update works if doc exists.
+        }
 
         // Optional: Update patient's overall risk if this screening detected a High risk
         if (prediction.severity === 'High' || prediction.severity === 'Critical') {

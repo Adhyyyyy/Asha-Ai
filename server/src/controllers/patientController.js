@@ -4,7 +4,24 @@ const { db } = require('../config/firebase');
 // Fetches all patients from the 'patients' collection in Firestore
 exports.getPatients = async (req, res) => {
     try {
-        const snapshot = await db.collection('patients').get();
+        let snapshot;
+
+        // DATA PRIVACY: Admins see all, ASHAs see only their own patients
+        if (req.user.role === 'ADMIN') {
+            if (req.query.ashaId) { // Admin wants to see specific worker's patients
+                snapshot = await db.collection('patients')
+                    .where('assigned_to', '==', req.query.ashaId)
+                    .get();
+            } else {
+                snapshot = await db.collection('patients').get();
+            }
+        } else {
+            // ASHA workers can only pull patients uniquely assigned to their ID
+            snapshot = await db.collection('patients')
+                .where('assigned_to', '==', req.user.uid)
+                .get();
+        }
+
         const patients = [];
 
         snapshot.forEach(doc => {
@@ -26,7 +43,8 @@ exports.addPatient = async (req, res) => {
             ...req.body,
             risk: 'Low', // Default risk for now
             last_visit: new Date().toISOString().split('T')[0],
-            createdAt: new Date()
+            createdAt: new Date(),
+            assigned_to: req.user.uid // SECURITY: Bind patient to the ASHA worker who added them
         };
 
         // Add to Firestore collection 'patients'
@@ -37,5 +55,34 @@ exports.addPatient = async (req, res) => {
     } catch (error) {
         console.error("Error adding patient:", error.message);
         res.status(500).json({ message: 'Server Error: Failed to add patient' });
+    }
+};
+
+// GET /api/patients/:id/screenings
+exports.getPatientScreenings = async (req, res) => {
+    try {
+        const patientId = req.params.id;
+
+        // We fetch screenings for this specific patient
+        const snapshot = await db.collection('screenings')
+            .where('patientId', '==', patientId)
+            .get();
+
+        const screenings = [];
+        snapshot.forEach(doc => {
+            screenings.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Sort by timestamp descending in memory (newest first)
+        screenings.sort((a, b) => {
+            const timeA = a.timestamp?._seconds || 0;
+            const timeB = b.timestamp?._seconds || 0;
+            return timeB - timeA;
+        });
+
+        res.status(200).json(screenings);
+    } catch (error) {
+        console.error("Error fetching patient screenings:", error.message);
+        res.status(500).json({ message: 'Server Error: Failed to fetch screenings' });
     }
 };

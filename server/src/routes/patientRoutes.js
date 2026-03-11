@@ -6,5 +6,6 @@ const patientController = require('../controllers/patientController');
 // Protect all patient routes with the "Lock" (verifyToken)
 router.get('/', verifyToken, patientController.getPatients);
 router.post('/', verifyToken, patientController.addPatient);
+router.get('/:id/screenings', verifyToken, patientController.getPatientScreenings);
 
 module.exports = router;

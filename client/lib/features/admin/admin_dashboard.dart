@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/api_service.dart';
 import '../patient/patient_list_screen.dart';
+import '../auth/login_screen.dart';
+import 'asha_list_screen.dart';
+import 'screening_list_screen.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -42,7 +46,27 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Dashboard')),
+      appBar: AppBar(
+        title: const Text('Admin Dashboard'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              // 1. Clear the saved token
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('auth_token');
+              
+              // 2. Go back to Login Screen
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false, // Clears the whole navigation stack
+                );
+              }
+            },
+          ),
+        ],
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
@@ -52,10 +76,34 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 children: [
-                  _buildCard('Total Patients', _stats?['total_patients'], Icons.people, Colors.blue),
-                  _buildCard('Total ASHAs', _stats?['total_ashas'], Icons.medical_services, Colors.green),
-                  _buildCard('Screenings', _stats?['total_screenings'], Icons.analytics, Colors.orange),
-                  _buildCard('High Risk', _stats?['risk_distribution']['high'], Icons.warning, Colors.red),
+                  _buildCard(
+                    title: 'Total Patients', 
+                    count: _stats?['total_patients'], 
+                    icon: Icons.people, 
+                    color: Colors.blue,
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PatientListScreen()))
+                  ),
+                  _buildCard(
+                    title: 'Total ASHAs', 
+                    count: _stats?['total_ashas'], 
+                    icon: Icons.medical_services, 
+                    color: Colors.green,
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AshaListScreen()))
+                  ),
+                  _buildCard(
+                    title: 'Screenings', 
+                    count: _stats?['total_screenings'], 
+                    icon: Icons.analytics, 
+                    color: Colors.orange,
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ScreeningListScreen()))
+                  ),
+                  _buildCard(
+                    title: 'High Risk', 
+                    count: _stats?['risk_distribution']['high'], 
+                    icon: Icons.warning, 
+                    color: Colors.red,
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PatientListScreen(showOnlyHighRisk: true)))
+                  ),
                 ],
               ),
             ),
@@ -63,18 +111,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   // Helper Widget
-   Widget _buildCard(String title, dynamic count, IconData icon, Color color) {
+   Widget _buildCard({required String title, required dynamic count, required IconData icon, required Color color, required VoidCallback onTap}) {
     return Card(
       elevation: 4,
       child: InkWell(
-        onTap: () {
-          if (title == 'Total Patients') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const PatientListScreen()),
-            );
-          }
-        },
+        onTap: onTap,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
