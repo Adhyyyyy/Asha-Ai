@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/services/api_service.dart';
+import '../../core/theme/design_system.dart';
 
 class AddAshaScreen extends StatefulWidget {
   const AddAshaScreen({super.key});
@@ -31,14 +32,14 @@ class _AddAshaScreenState extends State<AddAshaScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ASHA Worker Created Successfully!')),
+          const SnackBar(content: Text('ASHA Worker Deployed Successfully!')),
         );
-        Navigator.pop(context, true); // Return true to refresh list
+        Navigator.pop(context, true); 
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Error: $e'), backgroundColor: DesignSystem.riskHigh),
         );
       }
     } finally {
@@ -49,44 +50,80 @@ class _AddAshaScreenState extends State<AddAshaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add ASHA Worker')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      backgroundColor: DesignSystem.adminBackground,
+      appBar: AppBar(
+        title: const Text('Add ASHA Worker'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(DesignSystem.spacingL),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: _usernameController,
-                decoration: const InputDecoration(labelText: 'Username (Login ID)', border: OutlineInputBorder()),
-                validator: (value) => value!.isEmpty ? 'Please enter a username' : null,
-              ),
+              const Text('Worker Deployment', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              const Text('Register a new health worker for community surveillance.', style: TextStyle(color: DesignSystem.adminTextSecondary)),
+              const SizedBox(height: DesignSystem.spacingXL),
+              
+              _buildModernField(_usernameController, 'Login Username', Icons.alternate_email_rounded),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Initial Password', border: OutlineInputBorder()),
-                obscureText: true,
-                validator: (value) => value!.length < 6 ? 'Password must be at least 6 characters' : null,
-              ),
+              _buildModernField(_passwordController, 'Initial Password', Icons.lock_outline_rounded, isPassword: true),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _areaController,
-                decoration: const InputDecoration(labelText: 'Assigned Area (Village/Ward)', border: OutlineInputBorder()),
-                validator: (value) => value!.isEmpty ? 'Please assign an area' : null,
-              ),
-              const SizedBox(height: 24),
+              _buildModernField(_areaController, 'Assigned Service Area', Icons.location_on_outlined),
+              
+              const SizedBox(height: 60),
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 60,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _submitAsha,
-                  child: _isLoading ? const CircularProgressIndicator() : const Text('CREATE WORKER'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: DesignSystem.adminAccent,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignSystem.radiusM)),
+                    elevation: 10,
+                    shadowColor: DesignSystem.adminAccent.withOpacity(0.3),
+                  ),
+                  child: _isLoading 
+                    ? const CircularProgressIndicator(color: DesignSystem.adminBackground) 
+                    : const Text(
+                        'DEPLOY WORKER', 
+                        style: TextStyle(color: DesignSystem.adminBackground, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1.2)
+                      ),
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildModernField(TextEditingController controller, String label, IconData icon, {bool isPassword = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(), style: const TextStyle(color: DesignSystem.adminAccent, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          obscureText: isPassword,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: DesignSystem.adminTextSecondary, size: 20),
+            filled: true,
+            fillColor: DesignSystem.adminSurface,
+            contentPadding: const EdgeInsets.all(18),
+            enabledBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.white10), borderRadius: BorderRadius.circular(12)),
+            focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: DesignSystem.adminAccent, width: 2), borderRadius: BorderRadius.circular(12)),
+            errorStyle: const TextStyle(color: DesignSystem.riskHigh),
+          ),
+          validator: (value) => value!.isEmpty ? 'Field cannot be empty' : null,
+        ),
+      ],
     );
   }
 }

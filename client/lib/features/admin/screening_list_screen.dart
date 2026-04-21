@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/services/api_service.dart';
+import '../../core/theme/design_system.dart';
 
 class ScreeningListScreen extends StatefulWidget {
   const ScreeningListScreen({super.key});
@@ -35,40 +36,101 @@ class _ScreeningListScreenState extends State<ScreeningListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Recent Screenings')),
+      backgroundColor: DesignSystem.adminBackground,
+      appBar: AppBar(
+        title: const Text('Clinical Activity Logs'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(icon: const Icon(Icons.filter_list_rounded), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.file_download_outlined), onPressed: () {}),
+        ],
+      ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: DesignSystem.adminAccent))
           : _screenings.isEmpty
-              ? const Center(child: Text('No recent screenings found.'))
+              ? const Center(child: Text('No activity recorded.', style: TextStyle(color: DesignSystem.adminTextSecondary)))
               : ListView.builder(
+                  padding: const EdgeInsets.all(DesignSystem.spacingM),
                   itemCount: _screenings.length,
                   itemBuilder: (context, index) {
                     final scan = _screenings[index];
-                    final isHighRisk = scan['result']?['risk_score'] != null && scan['result']['risk_score'] > 70;
+                    final risk = scan['risk_score'] ?? 0;
+                    final severity = scan['severity'] ?? 'Low';
+                    final color = _getSeverityColor(severity);
                     
-                    return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: DesignSystem.adminSurface,
+                        borderRadius: BorderRadius.circular(DesignSystem.radiusM),
+                        border: Border.all(color: color.withOpacity(0.1)),
+                      ),
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: isHighRisk ? Colors.red.shade100 : Colors.blue.shade100,
-                          child: Icon(Icons.analytics, color: isHighRisk ? Colors.red : Colors.blue),
-                        ),
-                        title: Text('Patient ID: ${scan['patientId']}'),
-                        subtitle: Text(
-                          'Condition: ${scan['result']?['condition'] ?? 'Unknown'}\n'
-                          'Modality: ${scan['modality']?.toUpperCase() ?? 'N/A'}'
-                        ),
-                        trailing: Text(
-                          '${scan['result']?['risk_score'] ?? 0}% Risk',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: isHighRisk ? Colors.red : Colors.green,
+                        leading: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+                          child: Icon(
+                            _getModalityIcon(scan['modality']), 
+                            color: color, 
+                            size: 20
                           ),
+                        ),
+                        title: Text(
+                          scan['condition'] ?? 'General Screening', 
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+                            Text(
+                              'Patient ID: ${scan['patientId']}', 
+                              style: const TextStyle(color: DesignSystem.adminTextSecondary, fontSize: 12)
+                            ),
+                            Text(
+                              'Analyzed: ${scan['timestamp'] != null ? scan['timestamp'].toString().substring(0, 10) : "Recent"}',
+                              style: const TextStyle(color: DesignSystem.adminTextSecondary, fontSize: 11),
+                            ),
+                          ],
+                        ),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '$risk%', 
+                              style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 18)
+                            ),
+                            Text(
+                              severity.toUpperCase(), 
+                              style: TextStyle(color: color, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 1)
+                            ),
+                          ],
                         ),
                       ),
                     );
                   },
                 ),
     );
+  }
+
+  IconData _getModalityIcon(String? modality) {
+    switch (modality) {
+      case 'ocular_suite': return Icons.remove_red_eye_rounded;
+      case 'dermal_suite': return Icons.fingerprint_rounded;
+      case 'respiratory_suite': return Icons.mic_external_on_rounded;
+      default: return Icons.analytics_rounded;
+    }
+  }
+
+  Color _getSeverityColor(String severity) {
+    switch (severity.toLowerCase()) {
+      case 'critical':
+      case 'high': return DesignSystem.riskHigh;
+      case 'moderate': return DesignSystem.riskModerate;
+      default: return DesignSystem.riskLow;
+    }
   }
 }

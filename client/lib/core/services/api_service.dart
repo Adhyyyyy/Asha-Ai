@@ -1,11 +1,20 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   // 1. Base URL
-  // Android Emulator uses 10.0.2.2 to reach your PC's localhost
-  static const String baseUrl = 'http://10.0.2.2:3000/api';
+  // If running on Web, use localhost. If Emulator, use 10.0.2.2
+  static String get baseUrl {
+    const String envUrl = String.fromEnvironment('API_BASE_URL');
+    if (envUrl.isNotEmpty) return envUrl;
+    
+    if (kIsWeb) {
+      return 'http://localhost:3000/api';
+    }
+    return 'http://10.0.2.2:3000/api';
+  }
 
   // 2. Helper: Get Token (Private function start with _)
   // Future<String?> is like Promise<string | null> in TS
@@ -81,8 +90,8 @@ class ApiService {
       throw Exception('API Error: ${response.statusCode} ${response.body}');
     }
   }
-  // 6. Upload File (Multipart Request)
-  Future<dynamic> uploadFile(String endpoint, String filePath, Map<String, String> fields) async {
+  // 6. Upload File (Multipart Request) - UPDATED FOR WEB SUPPORT
+  Future<dynamic> uploadFile(String endpoint, List<int> bytes, String filename, Map<String, String> fields) async {
     final token = await _getToken();
     var uri = Uri.parse('$baseUrl$endpoint');
     var request = http.MultipartRequest('POST', uri);
@@ -95,9 +104,12 @@ class ApiService {
     // Add Fields (e.g., patientId, modality)
     request.fields.addAll(fields);
 
-    // Add File
-    // WE ASSUME THE FILE FIELD NAME IS 'file'
-    var pic = await http.MultipartFile.fromPath('file', filePath);
+    // Add File as Bytes (Works on both Web and Mobile)
+    var pic = http.MultipartFile.fromBytes(
+      'file',
+      bytes,
+      filename: filename,
+    );
     request.files.add(pic);
 
     // Send

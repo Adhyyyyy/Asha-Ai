@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/services/api_service.dart';
+import '../../core/theme/design_system.dart';
 
 class AddPatientScreen extends StatefulWidget {
   const AddPatientScreen({super.key});
@@ -13,7 +14,6 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   final _api = ApiService();
   bool _isLoading = false;
 
-  // Controllers
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
   final _trimesterController = TextEditingController();
@@ -32,14 +32,23 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Patient Added Successfully!')),
+          SnackBar(
+            content: const Text('Patient Registered Successfully!'),
+            backgroundColor: DesignSystem.riskLow,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignSystem.radiusM)),
+          ),
         );
-        Navigator.pop(context, true); // Return "true" to refresh list
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error: $e'), 
+            backgroundColor: DesignSystem.riskHigh,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } finally {
@@ -50,53 +59,124 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add New Patient')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      backgroundColor: DesignSystem.background,
+      appBar: AppBar(
+        title: const Text('New Registration'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(DesignSystem.spacingL),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder()),
-                validator: (value) => value!.isEmpty ? 'Please enter name' : null,
+              Text('Patient Details', style: DesignSystem.heading2),
+              const SizedBox(height: DesignSystem.spacingS),
+              Text('Enter the patient information carefully.', style: DesignSystem.bodySmall),
+              
+              const SizedBox(height: DesignSystem.spacingXL),
+
+              // FORM CARD
+              Container(
+                padding: const EdgeInsets.all(DesignSystem.spacingM),
+                decoration: BoxDecoration(
+                  color: DesignSystem.surface,
+                  borderRadius: BorderRadius.circular(DesignSystem.radiusL),
+                  boxShadow: DesignSystem.softShadow,
+                ),
+                child: Column(
+                  children: [
+                    _buildTextField(
+                      controller: _nameController,
+                      label: 'Full Name',
+                      icon: Icons.person_outline_rounded,
+                      validator: (v) => v!.isEmpty ? 'Name required' : null,
+                    ),
+                    const SizedBox(height: DesignSystem.spacingM),
+                    _buildTextField(
+                      controller: _ageController,
+                      label: 'Age (Years)',
+                      icon: Icons.cake_outlined,
+                      keyboardType: TextInputType.number,
+                      validator: (v) => v!.isEmpty ? 'Age required' : null,
+                    ),
+                    const SizedBox(height: DesignSystem.spacingM),
+                    _buildTextField(
+                      controller: _trimesterController,
+                      label: 'Current Trimester (1-3)',
+                      icon: Icons.pregnant_woman_rounded,
+                      keyboardType: TextInputType.number,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Required';
+                        final t = int.tryParse(v);
+                        if (t == null || t < 1 || t > 3) return 'Invalid';
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _ageController,
-                decoration: const InputDecoration(labelText: 'Age', border: OutlineInputBorder()),
-                keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? 'Please enter age' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _trimesterController,
-                decoration: const InputDecoration(labelText: 'Trimester (1-3)', border: OutlineInputBorder()),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                   if (value == null || value.isEmpty) return 'Enter trimester';
-                   final t = int.tryParse(value);
-                   if (t == null || t < 1 || t > 3) return 'Must be 1, 2, or 3';
-                   return null;
-                },
-              ),
-              const SizedBox(height: 12),
+
+              const SizedBox(height: DesignSystem.spacingXL),
+
               const Text(
-                'Note: Risk level will be established after initial AI screening.',
-                style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                'Note: Risk level will be established after your first AI screening.',
+                style: TextStyle(color: DesignSystem.textSecondary, fontStyle: FontStyle.italic, fontSize: 13),
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _submitPatient,
-                  child: _isLoading ? const CircularProgressIndicator() : const Text('REGISTER PATIENT'),
+              
+              const SizedBox(height: 60),
+
+              // SUBMIT BUTTON
+              GestureDetector(
+                onTap: _isLoading ? null : _submitPatient,
+                child: Container(
+                  width: double.infinity,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    gradient: DesignSystem.primaryGradient,
+                    borderRadius: BorderRadius.circular(DesignSystem.radiusM),
+                    boxShadow: DesignSystem.intenseShadow,
+                  ),
+                  child: Center(
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            'Register Patient',
+                            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                  ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: DesignSystem.bodySmall,
+        prefixIcon: Icon(icon, color: DesignSystem.primary.withOpacity(0.5)),
+        filled: true,
+        fillColor: DesignSystem.background.withOpacity(0.5),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(DesignSystem.radiusM),
+          borderSide: BorderSide.none,
         ),
       ),
     );

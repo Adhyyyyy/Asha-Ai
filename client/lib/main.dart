@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'core/theme/design_system.dart';
 import 'features/auth/login_screen.dart';
 
 void main() {
@@ -13,14 +14,17 @@ class AshaAiApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'ASHA-AI',
-      debugShowCheckedModeBanner: false, // Removes the "Debug" banner
+      debugShowCheckedModeBanner: false,
       
-      // THEME: This is where we set the colors for the whole app
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: DesignSystem.primary,
+          surface: DesignSystem.surface,
+          background: DesignSystem.background,
+        ),
         useMaterial3: true,
-        // Use Google Fonts globally
-        textTheme: GoogleFonts.interTextTheme(),
+        scaffoldBackgroundColor: DesignSystem.background,
+        textTheme: GoogleFonts.outfitTextTheme(),
       ),
       
       // START SCREEN: Show Login first
