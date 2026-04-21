@@ -13,6 +13,16 @@ exports.getAshaStats = async (req, res) => {
         const screeningsSnap = await db.collection('screenings').where('asha_id', '==', uid).get();
         const totalScreenings = screeningsSnap.size;
 
+        // Calculate screenings today
+        const today = new Date().toISOString().split('T')[0];
+        let screeningsToday = 0;
+        screeningsSnap.forEach(doc => {
+            const ts = doc.data().timestamp;
+            if (ts && ts.toDate().toISOString().split('T')[0] === today) {
+                screeningsToday++;
+            }
+        });
+
         // 2. Fetch all ASHA workers to calculate Rank
         // 2. Fetch all ASHA workers to calculate Rank
         // Remove .orderBy('points', 'desc') to prevent Index errors, sort in memory
@@ -50,11 +60,32 @@ exports.getAshaStats = async (req, res) => {
         const userDoc = await db.collection('users').doc(uid).get();
         const points = userDoc.exists ? (userDoc.data().points || 0) : 0;
 
+        // 3. Fetch Recent Screenings (Dynamic Activity) - Sorted in memory to avoid Index requirements
+        const recentScreeningsSnap = await db.collection('screenings')
+            .where('asha_id', '==', uid)
+            .limit(10) // Fetch a few more to allow for sorting
+            .get();
+
+        const recent_activities = [];
+        recentScreeningsSnap.forEach(doc => {
+            const data = doc.data();
+            recent_activities.push({
+                id: doc.id,
+                ...data
+            });
+        });
+
+        // Sort by timestamp descending in memory
+        recent_activities.sort((a, b) => (b.timestamp?._seconds || 0) - (a.timestamp?._seconds || 0));
+        const limited_activities = recent_activities.slice(0, 5);
+
         res.status(200).json({
             total_patients: totalPatients,
             total_screenings: totalScreenings,
+            screenings_today: screeningsToday,
             points: points,
-            leaderboard_rank: rank
+            leaderboard_rank: rank,
+            recent_activities: limited_activities
         });
 
     } catch (error) {

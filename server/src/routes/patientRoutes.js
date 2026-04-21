@@ -7,5 +7,6 @@ const patientController = require('../controllers/patientController');
 router.get('/', verifyToken, patientController.getPatients);
 router.post('/', verifyToken, patientController.addPatient);
 router.get('/:id/screenings', verifyToken, patientController.getPatientScreenings);
+router.delete('/:id', verifyToken, patientController.deletePatient);
 
 module.exports = router;
