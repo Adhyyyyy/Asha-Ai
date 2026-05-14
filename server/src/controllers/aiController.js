@@ -109,9 +109,9 @@ exports.analyzeHealth = async (req, res) => {
                     req.file.mimetype, 
                     parsedManualData
                 );
-                console.log("✅ GEMINI ASSESSMENT SUCCESSFUL");
+                console.log("✅ AI ENGINE ASSESSMENT SUCCESSFUL");
             } catch (aiErr) {
-                console.error("⚠️ Gemini Failed, falling back to mock:", aiErr.message);
+                console.error("⚠️ AI Engine Failed, falling back to mock:", aiErr.message);
                 prediction = getFallbackPrediction(modality, parsedManualData);
             }
         } else {

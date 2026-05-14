@@ -400,7 +400,7 @@ class _AiScreeningScreenState extends State<AiScreeningScreen> with SingleTicker
           const SizedBox(height: DesignSystem.spacingXL),
           Text('Analyzing Health Data', style: DesignSystem.heading2),
           const SizedBox(height: DesignSystem.spacingS),
-          Text('Gemini AI is processing the screening...', style: DesignSystem.bodySmall),
+          Text('Asha-Ai Engine is processing the screening...', style: DesignSystem.bodySmall),
         ],
       ),
     );

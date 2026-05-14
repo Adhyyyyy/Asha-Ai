@@ -1,0 +1,281 @@
+# ASHA-AI: PROJECT REPORT CONTENT
+
+## ABSTRACT
+
+The rapid advancement of artificial intelligence has opened new frontiers in decentralized healthcare, particularly in rural and underserved regions where access to specialized medical diagnosis is limited. This project presents **Asha-Ai**, an innovative AI-based diagnostic application designed to empower Accredited Social Health Activists (ASHA) with preliminary screening capabilities. The application addresses the critical problem of delayed diagnosis for common conditions such as anemia, jaundice, and respiratory infections by providing an accessible, mobile-first screening tool. 
+
+Built using a modern tech stack comprising **Flutter** for a cross-platform mobile interface, **Node.js** for the backend, and **Google Firestore** for real-time data management, Asha-Ai integrates state-of-the-art Generative AI via the **Gemini 2.0 Flash** model. Key features include an AI-powered Ocular Suite for anemia detection, a Dermal Suite for skin abnormalities, and a Respiratory Assessment module for lung health analysis. By automating clinical reasoning and providing actionable prevention plans, the system bridges the gap between community health workers and specialized care. Asha-Ai demonstrates significant social relevance by digitizing rural health records and technical relevance by applying multimodal AI to mobile health (mHealth). This project is academically suitable as it fulfills the requirements of the B.Tech 6th Semester Mini Project curriculum at CUSAT.
+
+---
+
+## CHAPTER 1: INTRODUCTION
+
+### 1.1 Background
+The global healthcare landscape is currently undergoing a digital transformation, driven by the proliferation of mobile technologies and high-speed internet. In countries like India, the community health workers, known as ASHA (Accredited Social Health Activists), serve as the primary link between the rural population and the public health system. However, these workers often lack the diagnostic tools necessary for early detection of critical health issues, leading to reliance on subjective observations and late-stage referrals.
+
+The integration of Mobile App Development with Artificial Intelligence (AI) offers a viable solution to these challenges. By deploying sophisticated diagnostic algorithms onto mobile devices, health workers can conduct non-invasive screenings at the patient's doorstep. Modern mHealth applications leverage the computing power of smartphones to process multi-modal data—including images and audio—to provide high-fidelity clinical insights that were previously only available in clinical settings.
+
+### 1.2 Problem Definition
+The motivation for developing Asha-Ai stems from several systemic challenges in rural healthcare:
+*   **Inaccessibility of Specialized Care**: Rural populations often travel long distances to reach diagnostic centers for simple screenings.
+*   **Late Detection of Conditions**: Asymptomatic conditions like early-stage anemia or mild respiratory infections often go undetected due to lack of screening tools.
+*   **Inconsistent Data Management**: Paper-based record-keeping by health workers leads to data loss and difficulty in tracking longitudinal patient health.
+*   **Limited Diagnostic Expertise**: ASHA workers require advanced clinical support to make informed decisions regarding patient referrals.
+
+### 1.3 Scope and Motivation
+The scope of Asha-Ai encompasses the registration of patients, secure storage of health profiles, and AI-driven preliminary screening for ocular, dermal, and respiratory health markers. While the current version provides diagnostic *indications* and risk assessments, it does not replace a definitive medical diagnosis by a licensed physician. The system focuses on early-level triage to identify high-risk cases that require immediate clinical attention.
+
+The motivation for this project is to use the developer's technical skills in mobile development and AI to solve a real-world social problem. Enabling ASHA workers with such tools significantly reduces the burden on the tertiary healthcare system and improves the quality of life for rural citizens through early preventative care.
+
+### 1.4 Objectives
+*   To develop a cross-platform mobile application for ASHA workers using the Flutter framework.
+*   To implement a robust authentication system for Admins and ASHA workers using Firebase.
+*   To enable real-time patient registration and health record management using Google Firestore.
+*   To integrate the Gemini 2.0 Flash AI model for analyzing ocular and dermal images.
+*   To implement an AI-based audio analysis module for respiratory health assessment.
+*   To provide an automated clinical reasoning engine that generates diagnostic summaries and prevention plans.
+*   To develop an administrative dashboard for monitoring health metrics and worker performance at a village level.
+*   To ensure secure data storage and privacy for sensitive patient health information.
+
+---
+
+## CHAPTER 2: REQUIREMENT ANALYSIS
+
+### 2.1 Functional Requirements
+
+#### Sub-Module 1: User Authentication and Profile Management
+*   **FR-01**: The system shall allow Admins to create and manage ASHA worker accounts.
+*   **FR-02**: The system shall provide secure login functionality for ASHA workers using unique credentials.
+*   **FR-03**: The system shall support role-based access control (RBAC) to differentiate between Admin and ASHA Worker features.
+*   **FR-04**: The system shall allow users to view and update their professional profile, including assigned areas and performance stats.
+
+#### Sub-Module 2: Patient Information Management
+*   **FR-05**: The system shall allow ASHA workers to register new patients with demographic details.
+*   **FR-06**: The system shall support the searching and filtering of registered patients within the worker's assigned area.
+*   **FR-07**: The system shall maintain a longitudinal history of all screenings performed for a particular patient.
+*   **FR-08**: The system shall allow uploading and storing patient profile photographs securely.
+
+#### Sub-Module 3: AI Diagnostic Screening Suite
+*   **FR-09**: The system shall provide an Ocular Suite for capturing and analyzing eye images for anemia and jaundice.
+*   **FR-10**: The system shall include a Dermal Suite for identifying skin rashes and nutritional deficiencies.
+*   **FR-11**: The system shall feature a Respiratory Suite for recording cough/breathing sounds for infection screening.
+*   **FR-12**: The system shall interact with the Gemini AI service to process captured media and generate structured reports.
+
+#### Sub-Module 4: Analytics and Reporting
+*   **FR-13**: The system shall generate a detailed diagnostic report including risk scores (0-100) and severity levels.
+*   **FR-14**: The system shall provide a dashboard view for ASHA workers to track their daily and monthly screening targets.
+*   **FR-15**: The system shall allow Admins to view global health metrics and risk distributions across all villages.
+*   **FR-16**: The system shall display a leaderboard for ASHA workers based on screening performance and data accuracy.
+
+### 2.2 Non-Functional Requirements
+
+#### Performance
+*   **NFR-01**: The AI analysis result should be returned to the mobile app within 10-15 seconds under standard 4G connectivity.
+*   **NFR-02**: The mobile app should support smooth navigation with a screen transition time of less than 200ms.
+
+#### Security
+*   **NFR-03**: All patient data must be encrypted in transit and at rest using industry-standard protocols.
+*   **NFR-04**: API keys and sensitive credentials must be stored in secure backend environment variables.
+
+#### Usability
+*   **NFR-05**: The interface must be intuitive, requiring minimal training for users with basic smartphone literacy.
+*   **NFR-06**: High-contrast UI elements and large touch targets should be used to ensure accessibility for field use.
+
+#### Scalability
+*   **NFR-07**: The backend architecture should support a growing number of ASHA workers and concurrent screening requests.
+*   **NFR-08**: Firestore's NoSQL structure must be optimized for horizontal scaling as the patient database expands.
+
+#### Reliability and Compatibility
+*   **NFR-09**: The application must maintain 99.9% uptime for the backend services hosted on cloud infrastructure.
+*   **NFR-10**: The app must be compatible with Android 8.0 (Oreo) and above to support older smartphones commonly used in rural areas.
+
+### 2.3 Hardware and Software Requirements
+
+#### Hardware Requirements
+*   **Development Machine**: 8GB RAM, i5 Processor or equivalent, 256GB SSD.
+*   **Target Device (Smartphone)**: Android device with minimum 3GB RAM, 10MP Camera, and Microphone.
+*   **Cloud Infrastructure**: Google Cloud Platform (GCP) servers for backend hosting.
+
+#### Software Requirements
+*   **Operating System**: Windows 10/11 or macOS for development.
+*   **Integrated Development Environment (IDE)**: VS Code with Flutter and Dart extensions, Android Studio.
+*   **Frameworks**: Flutter (Frontend), Express.js (Backend).
+*   **Programming Languages**: Dart (Client), JavaScript (Server).
+*   **Backend Services**: Firebase Authentication, Firestore Database, Firebase Storage.
+*   **APIs**: Google Generative AI (Gemini 2.0 Flash API).
+
+### 2.4 Interface Requirements
+
+#### 1. User Interface
+The UI is designed using Flutter Material Design 3 principles. It features a clean, white and emerald-green color palette to evoke a healthcare theme. Key screens include a bottom-nav-based dashboard, a grid-based diagnostic selection menu, and a structured report view with color-coded risk indicators.
+
+#### 2. Hardware Interface
+The application interfaces with the mobile device's camera via the `image_picker` library for ocular and dermal screenings. It utilizes the device's microphone via specialized audio recording plugins for the respiratory suite. Data is transmitted via the device's Wi-Fi or Cellular network interface.
+
+#### 3. Software Interface
+The application communicates with the Google Firebase SDK for authentication and database operations. It calls a custom Node.js REST API for AI processing, which in turn interfaces with the Google Generative AI Python/JS library.
+
+### 2.5 Constraints
+*   **Network Dependency**: The AI diagnostic feature requires an active internet connection to communicate with the Gemini API.
+*   **Hardware Variability**: Camera quality on low-end devices may affect the accuracy of ocular and dermal AI analysis.
+*   **API Usage Limits**: The free tier of the Gemini API imposes rate limits on the number of screenings per minute.
+*   **Data Privacy**: Local regulations regarding health data (like DISHA in India) must be strictly followed, which may limit cloud storage options.
+*   **Language Barrier**: The current version only supports English, whereas rural workers may prefer localized vernacular interfaces.
+*   **Battery Consumption**: Frequent use of the camera and high-intensity AI API calls can lead to faster battery drain during field visits.
+
+---
+
+## CHAPTER 3: SYSTEM DESIGN
+
+### 3.1 Activity Diagram Description
+The Activity Diagram of Asha-Ai illustrates the logical flow of the screening process. It begins when the ASHA worker logs into the system. The user is presented with a dashboard where they can choose to add a new patient or select an existing one. Upon selecting a patient, the user enters the "Diagnostic Hub." From here, a decision point occurs where the user selects the screening type: Ocular, Dermal, or Respiratory. Depending on the choice, the system triggers the respective capture activity (Camera or Microphone). Once the media is captured, the system uploads it to the backend and invokes the AI engine. The AI performs clinical reasoning and returns a JSON-structured assessment. This data is then rendered into a human-readable report. The activity concludes with the user saving the report to the patient's history and returning to the dashboard.
+
+### 3.2 Class Diagram Description
+The project architecture follows a modular Object-Oriented design. The core classes include the `User` class (defining Admin and ASHA Worker attributes), the `Patient` class (holding demographic and medical metadata), and the `Screening` class (representing an individual diagnostic session). A specialized `AIService` class acts as a singleton for managing communications with the Gemini API. The `PatientRepository` and `ScreeningRepository` classes handle data persistence logic via the Firestore SDK. UI controllers like `DashboardController` and `ScreeningController` manage state and user interactions. Relationships are defined by associations: one `User` (ASHA Worker) manages multiple `Patients`, and each `Patient` can have several `Screening` instances associated with them.
+
+---
+
+## CHAPTER 4: IMPLEMENTATION
+
+### 4.1 Modules
+
+#### 4.1.1 Authentication and Access Control Module
+This module handles the secure onboarding of health workers. It uses Firebase Authentication to manage login states and JWT tokens. It ensures that only authorized personnel can access patient data and identifies the worker responsible for each screening session.
+
+#### 4.1.2 Patient Management System
+The Patient Management module is responsible for the CRUD (Create, Read, Update, Delete) operations of patient profiles. It implements a local search algorithm and ensures that health workers only see patients assigned to their specific geographic village or ward.
+
+#### 4.1.3 AI Diagnostic Engine (Backend)
+This is the core intelligence of Asha-Ai. Hosted on a Node.js server, it receives media data from the mobile app, interacts with the Gemini 2.0 Flash model using specialized medical prompts, and converts unstructured AI responses into structured diagnostic data.
+
+#### 4.1.4 Multimodal Media Hub
+The Media Hub manages the capturing and processing of healthcare data. It includes the camera interface for capturing ocular and dermal images and the audio recording interface for respiratory sounds, ensuring files are optimized for transmission.
+
+#### 4.1.5 Administrative Analytics Dashboard
+This module provides a bird's-eye view of community health. It aggregates data from the Firestore database to generate heatmaps of health risks, worker productivity leaderboards, and overall system metrics for health department supervisors.
+
+### 4.2 Tools Used
+
+#### 4.2.1 Frontend Tools
+*   **Flutter SDK**: Used as the primary framework for building the high-performance cross-platform mobile application.
+*   **Dart Language**: Used for writing consistent and type-safe client-side application logic.
+*   **Material Design 3**: Used for implementing a modern, responsive, and accessible user interface.
+*   **Firebase SDK**: Facilitates direct communication with Firestore and Authentication services from the client.
+
+#### 4.2.2 Backend Tools
+*   **Node.js / Express.js**: Used to build the RESTful API for handling complex AI processing tasks.
+*   **Google Gemini API**: Provides the underlying Large Language Model (LLM) capabilities for medical image and audio analysis.
+*   **Postman**: Utilized for testing and documenting the backend API endpoints during development.
+*   **Firestore**: Serves as the real-time, scalable NoSQL database for JSON-like health records.
+
+---
+
+## CHAPTER 5: TESTING AND EVALUATION
+
+### 5.1 Screen Testing
+
+#### Screen 1: Login Screen
+| Test Case ID | Test Case Description | Expected Result | Achieved Result | Status |
+|---|---|---|---|---|
+| TC-L1 | Verify login with valid ASHA credentials | Redirects to Dashboard | Redirected to Dashboard | PASS |
+| TC-L2 | Verify login with invalid email format | Shows "Invalid Email" error | Showed "Invalid Email" | PASS |
+| TC-L3 | Verify login with incorrect password | Shows "Wrong Credentials" alert | Showed "Wrong Credentials" | PASS |
+| TC-L4 | Verify password visibility toggle | Switches password text to plain/masked | Toggled successfully | PASS |
+| TC-L5 | Verify login button behavior when fields are empty | Button remains disabled or shows error | Showed "Required Fields" | PASS |
+
+#### Screen 2: Patient Registration Screen
+| Test Case ID | Test Case Description | Expected Result | Achieved Result | Status |
+|---|---|---|---|---|
+| TC-P1 | Register patient with all mandatory fields | Saves to Firestore and shows success | Saved and success shown | PASS |
+| TC-P2 | Register patient with missing age | Shows "Age is required" toast | Toast appeared correctly | PASS |
+| TC-P3 | Verify image picker for profile photo | Opens gallery/camera correctly | Opened and picked image | PASS |
+| TC-P4 | Verify gender selection dropdown | Allows selecting Male/Female/Other | Selection worked correctly | PASS |
+| TC-P5 | Register patient with duplicate ID | Handles error and alerts user | Error handled correctly | PASS |
+
+#### Screen 3: Diagnostic Selection (Hub) Screen
+| Test Case ID | Test Case Description | Expected Result | Achieved Result | Status |
+|---|---|---|---|---|
+| TC-D1 | Click on Ocular Suite card | Navigates to camera for eye capture | Navigated successfully | PASS |
+| TC-D2 | Click on Respiratory Suite card | Navigates to audio recording screen | Navigated successfully | PASS |
+| TC-D3 | Verify display of patient name on top | Shows correct name from database | Name displayed correctly | PASS |
+| TC-D4 | Click on 'History' tab | Shows list of previous screenings | List appeared correctly | PASS |
+| TC-D5 | Verify 'Back' button behavior | Returns to previous patient list | Returned correctly | PASS |
+
+#### Screen 4: AI Analysis Result Screen
+| Test Case ID | Test Case Description | Expected Result | Achieved Result | Status |
+|---|---|---|---|---|
+| TC-R1 | Display of risk level indicator | Shows Green/Yellow/Red color code | Correct color displayed | PASS |
+| TC-R2 | Display of clinical reasoning text | Shows step-by-step logic from AI | Reasoning shown properly | PASS |
+| TC-R3 | Verify 'Prevention Plan' section | Lists actionable health advice | Advice listed correctly | PASS |
+| TC-R4 | Verify 'Save' button | Persists the report to patient history | Saved successfully | PASS |
+| TC-R5 | Verify confidence score gauge | Displays percentage correctly | Score shown (e.g., 92%) | PASS |
+
+#### Screen 5: Admin Analytics Dashboard
+| Test Case ID | Test Case Description | Expected Result | Achieved Result | Status |
+|---|---|---|---|---|
+| TC-A1 | Load global screening count | Displays accurate sum from Firestore | Value loaded correctly | PASS |
+| TC-A2 | Verify risk distribution chart | Renders pie/bar chart of health risks | Chart rendered successfully | PASS |
+| TC-A3 | Load ASHA worker leaderboard | Sorts workers by screening count | Sorted list appeared | PASS |
+| TC-A4 | Search for specific worker | Filters the list by name/ID | Filtered successfully | PASS |
+| TC-A5 | Verify logout functionality | Ends session and returns to login | Session ended correctly | PASS |
+
+---
+
+## CHAPTER 6: CONCLUSION AND FUTURE SCOPE
+
+### 6.1 Conclusion
+Asha-Ai successfully demonstrates the potential of integrating advanced Artificial Intelligence with mobile health systems to improve rural diagnostic outcomes. The project achieves its primary goal of providing ASHA workers with a reliable, AI-powered tool for screening anemia, jaundice, skin diseases, and respiratory issues. By leveraging the Flutter framework and Firebase ecosystem, the application offers a seamless and high-performance experience on a variety of Android devices. 
+
+The implementation of the Gemini 2.0 Flash model has proven effective in providing structured clinical reasoning, which serves as a crucial educational and decision-support resource for health workers. Extensive testing has validated the robustness of the system across authentication, patient management, and diagnostic modules. Ultimately, Asha-Ai stands as a scalable solution for early disease detection, digitizing community health data, and strengthening the primary healthcare infrastructure in India.
+
+### 6.2 Future Scope
+*   **Offline Mode Integration**: Implementing a local database (like SQLite) to allow data capture in areas without internet connectivity.
+*   **Multi-language Support**: Translating the interface into regional Indian languages like Malayalam, Hindi, and Tamil.
+*   **Specialized AI Models**: Fine-tuning vision models specifically for tropical skin diseases and pediatric nutrition.
+*   **Predictive Analytics**: Using historical data to predict disease outbreaks at the village or district level.
+*   **Wearable Integration**: Connecting with Bluetooth-enabled pulse oximeters and blood pressure monitors for real-time vitals tracking.
+*   **Tele-consultation Hub**: Enabling direct video calls between ASHA workers and doctors for critical cases identified by the AI.
+*   **Gamification**: Introducing a reward system for health workers based on the accuracy and volume of their community screenings.
+*   **IoT Stethoscope Support**: Integrating digital stethoscopes for more precise AI-based lung and heart sound analysis.
+
+---
+
+## CHAPTER 7: REFERENCES
+
+1.  Flutter Documentation. "Building Beautiful Apps: Official Developer Guide." [Online]. Available: https://docs.flutter.dev/ [Accessed: April 2026].
+2.  Firebase Documentation. "Firebase Fundamentals and Cloud Firestore Guides." [Online]. Available: https://firebase.google.com/docs [Accessed: April 2026].
+3.  Google AI for Developers. "Gemini API Overview: Multimodal Capabilities." [Online]. Available: https://ai.google.dev/docs/gemini_api_overview [Accessed: April 2026].
+4.  IEEE Std 11073-10101-2019. "IEEE Standard - Health Informatics - Personal Health Device Communication." [Online]. Available: https://ieeexplore.ieee.org/document/8885662 [Accessed: April 2026].
+5.  World Health Organization (WHO). "Digital Health for Community Health Workers." [Online]. Available: https://www.who.int/topics/digital-health [Accessed: April 2026].
+6.  Dart Language. "C-Style Language for Client Apps: Language Reference." [Online]. Available: https://dart.dev/guides [Accessed: April 2026].
+
+---
+
+## APPENDICES
+
+### Appendix A: Glossary
+| Term | Definition |
+|---|---|
+| ASHA | Accredited Social Health Activist (Community health worker in India). |
+| mHealth | Mobile Health: The use of mobile devices to support medical and public health practice. |
+| Flutter | An open-source UI software development kit created by Google. |
+| Firestore | A flexible, scalable NoSQL cloud database for mobile, web, and server development. |
+| Gemini AI | Google's series of generative artificial intelligence models. |
+| Ocular Suite | A set of diagnostic tools focusing on eye-related indicators. |
+| LLM | Large Language Model: AI trained on vast amounts of text and data. |
+| CRUD | Create, Read, Update, and Delete: Four basic functions of persistent storage. |
+
+### Appendix B: Analysis Models
+The development of Asha-Ai was guided by several UML and analysis models:
+1.  **Use Case Diagram**: Identified the interactions between the Admin, ASHA Worker, and the AI System.
+2.  **Class Diagram**: Defined the structure of the system including attributes, methods, and entity relationships.
+3.  **Sequence Diagram**: Modeled the step-by-step interaction for the AI screening request and response flow.
+4.  **Activity Diagram**: Visualized the workflow of the mobile application from login to final report generation.
+
+### Appendix C: TBD List
+| TBD Item | Description |
+|---|---|
+| Vernacular AI | Integration of Gemini's multi-lingual capabilities for Hindi and Malayalam report generation. |
+| Push Notifications | Implementing FCM (Firebase Cloud Messaging) for alerting health workers about pending screenings. |
+| QR Code Profiles | Future plan to assign unique QR codes to patients for instant profile retrieval. |
+| Automated PII Redaction | Enhancing privacy by automatically redacting faces from diagnostic photos in stored reports. |
